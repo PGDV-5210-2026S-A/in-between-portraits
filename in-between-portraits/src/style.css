@@ -244,6 +244,10 @@ select {
   opacity: 0;
 }
 
+.section-full-width .page-section-content {
+  max-width: none; /* opts out of the PageSection max-w-[1600px] cap */
+}
+
 .exhibitions-bridge-anchor {
   height: 1px;
   pointer-events: none;
@@ -292,8 +296,8 @@ select {
   margin-left: 0.5rem;
 }
 
-.exhibitions-bridge-label__token--and,
-.exhibitions-bridge-label__token--artists {
+.exhibitions-bridge-label__token--artists,
+.exhibitions-bridge-label__token--institutions {
   opacity: 0;
 }
 

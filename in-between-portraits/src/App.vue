@@ -30,15 +30,10 @@ const introPreviewVideoRef = ref(null);
 const introFadeToWhiteActive = ref(false);
 const INTRO_END_FADE_SECONDS = 2.4;
 const INTRO_WHITE_HOLD_MS = 180;
-const datasetInfoPoints = [
-  "Metropolitan Museum of Art,	New York, NY",
-  "National Gallery of Art, Washington, D. C.",
-  "Museum of Modern Art, New York, NY",
-  "Art Institute of Chicago, Chicago, IL",
-  "J. Paul Getty Center, Los Angeles, CA",
-  "Smithsonian American Art Museum, Washington, D. C.",
-  "Whitney Museum of American Art, New York, NY",
-  "Cleveland Museum of Art, Cleveland, OH",
+const artistSelectionPoints = [
+  "An initial dataset of exhibitions was curated from modern and contemporary shows about identity.",
+  "From the list of the top 100 most visited art museums in the world in 2025, those with open access digital archives were selected.",
+  "Artists who also fit the case study criteria and have work catalogued within these museums and exhibitions make up the final dataset.",
 ];
 
 const section2HeadingHtml = [
@@ -190,6 +185,7 @@ onBeforeUnmount(() => {
         <!-- Section 2 ─ Identity states -->
         <PageSection
           ref="section2Ref"
+          class="section-full-width"
           tone="dark"
           layout="split"
           :heading-html="section2HeadingHtml"
@@ -200,6 +196,7 @@ onBeforeUnmount(() => {
         <!-- Actors -->
         <PageSection
           ref="actorsRef"
+          class="section-full-width"
           tone="light"
           layout="stacked"
           texture-preset="rightSoft"
@@ -209,7 +206,13 @@ onBeforeUnmount(() => {
         </PageSection>
 
         <!-- Persona -->
-        <PageSection ref="section3Ref" tone="light" layout="split" texture-preset="leftDual">
+        <PageSection
+          ref="section3Ref"
+          class="section-full-width"
+          tone="light"
+          layout="split"
+          texture-preset="leftDual"
+        >
           <div
             class="grid h-full grid-cols-12 content-between gap-x-2 gap-y-8 md:grid-rows-[auto_1fr_auto] md:gap-x-4"
           >
@@ -236,6 +239,7 @@ onBeforeUnmount(() => {
         <!-- Exhibition section -->
         <PageSection
           ref="timelineRef"
+          class="section-full-width"
           tone="dark"
           layout="stacked"
           stacked-full-width
@@ -245,11 +249,11 @@ onBeforeUnmount(() => {
         >
           <template #subheading-addon>
             <InfoModal
-              headingHtml="Artists are catalogued by top museum digital archives:"
-              :bullet-points="datasetInfoPoints"
-              triggerTitle="Artist selection criteria"
+              heading="More about the artist selection process"
+              :bullet-points="artistSelectionPoints"
+              triggerTitle="More about the artist selection process"
               list-type="numbered"
-              aria-label="Open dataset information modal"
+              aria-label="Open artist selection information modal"
               class="app-exhibitions-info-button"
             />
           </template>
@@ -258,7 +262,13 @@ onBeforeUnmount(() => {
         </PageSection>
 
         <!-- Sankey section -->
-        <PageSection ref="sankeyRef" tone="dark" layout="stacked" stacked-full-width>
+        <PageSection
+          ref="sankeyRef"
+          class="section-full-width"
+          tone="dark"
+          layout="stacked"
+          stacked-full-width
+        >
           <div ref="exhibitionsAnchorEndRef" class="exhibitions-bridge-anchor mb-4" aria-hidden="true"></div>
           <ExhibitionsSankey />
         </PageSection>
@@ -289,7 +299,7 @@ onBeforeUnmount(() => {
   </div>
 
   <div ref="exhibitionsLabelRef" class="exhibitions-bridge-label">
-    <div class="mx-auto w-full max-w-[1600px] px-4 md:px-8">
+    <div class="mx-auto w-full px-4 md:px-8">
       <div class="grid grid-cols-12 gap-x-2 md:gap-x-4">
         <div class="col-span-12">
           <div
@@ -302,12 +312,14 @@ onBeforeUnmount(() => {
               Exhibitions
             </span>
             <span
-              class="label-text exhibitions-bridge-label__token exhibitions-bridge-label__token--and"
-            >and</span>
-            <span
               class="label-text exhibitions-bridge-label__token exhibitions-bridge-label__token--artists"
             >
               artists
+            </span>
+            <span
+              class="label-text exhibitions-bridge-label__token exhibitions-bridge-label__token--institutions"
+            >
+              institutions
             </span>
           </div>
         </div>

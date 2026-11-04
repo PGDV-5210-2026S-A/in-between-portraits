@@ -19,6 +19,7 @@ const EXHIBITIONS_SCROLL_CONFIG = {
     startXOffsetPx: 6,
     exhibitionsEndXNudgePx: 2,
     artistsEndXNudgePx: -2,
+    institutionsEndXNudgePx: -4,
   },
 };
 const SECTION_HANDOFF_SCROLL_CONFIG = {
@@ -507,10 +508,11 @@ function setupExhibitionsLabel({
 
   const trackEl = labelEl.querySelector(".exhibitions-bridge-label__track");
   const exhibitionsEl = labelEl.querySelector(".exhibitions-bridge-label__token--exhibitions");
-  const andEl = labelEl.querySelector(".exhibitions-bridge-label__token--and");
   const artistsEl = labelEl.querySelector(".exhibitions-bridge-label__token--artists");
-  if (!trackEl || !exhibitionsEl || !andEl || !artistsEl) return;
-  gsap.set([exhibitionsEl, andEl, artistsEl], { yPercent: -50 });
+  const institutionsEl = labelEl.querySelector(".exhibitions-bridge-label__token--institutions");
+  if (!trackEl || !exhibitionsEl || !artistsEl) return;
+  const fadeInEls = [artistsEl, institutionsEl].filter(Boolean);
+  gsap.set([exhibitionsEl, ...fadeInEls], { yPercent: -50 });
 
   function yFromTimelineBaseline() {
     const baselineLine = [...timelineSectionEl.querySelectorAll(".exhibitions-timeline line")]
@@ -534,32 +536,38 @@ function setupExhibitionsLabel({
     if (!svg) return null;
     const exX = parseFloat(svg.getAttribute(EXHIBITIONS_SANKEY_BRIDGE_ATTR.exhibitionLabelAnchorX));
     const arX = parseFloat(svg.getAttribute(EXHIBITIONS_SANKEY_BRIDGE_ATTR.artistLabelAnchorX));
+    const inX = parseFloat(
+      svg.getAttribute(EXHIBITIONS_SANKEY_BRIDGE_ATTR.institutionLabelAnchorX),
+    );
     const h = parseFloat(svg.getAttribute("height"));
     const midY = Number.isFinite(h) ? h / 2 : 0;
     if (!Number.isFinite(exX) || !Number.isFinite(arX)) return null;
     const exhibitionRight = sankeySvgUserXToViewportX(svg, exX, midY);
     const artistLeft = sankeySvgUserXToViewportX(svg, arX, midY);
     if (exhibitionRight == null || artistLeft == null) return null;
-    return { exhibitionRight, artistLeft };
+    const institutionLeft = Number.isFinite(inX)
+      ? sankeySvgUserXToViewportX(svg, inX, midY)
+      : null;
+    return { exhibitionRight, artistLeft, institutionLeft };
   }
 
   function getTokenTargets() {
     const trackRect = trackEl.getBoundingClientRect();
     const exhibitionWidth = exhibitionsEl.getBoundingClientRect().width;
-    const andWidth = andEl.getBoundingClientRect().width;
     const artistsWidth = artistsEl.getBoundingClientRect().width;
     const trackWidth = trackRect.width;
     const startAnchoredExhibitionsX = EXHIBITIONS_SCROLL_CONFIG.bridgeLabel.startXOffsetPx;
     const nudgeEx = EXHIBITIONS_SCROLL_CONFIG.bridgeLabel.exhibitionsEndXNudgePx;
     const nudgeArt = EXHIBITIONS_SCROLL_CONFIG.bridgeLabel.artistsEndXNudgePx;
+    const nudgeInst = EXHIBITIONS_SCROLL_CONFIG.bridgeLabel.institutionsEndXNudgePx;
     const sankeyTargets = getSankeyColumnTargets();
     if (!sankeyTargets) {
-      const fallbackAndX = trackWidth / 2 - andWidth / 2;
+      const fallbackArtistsX = trackWidth / 2 - artistsWidth / 2 + nudgeArt;
       return {
         exhibitionsStartX: startAnchoredExhibitionsX,
         exhibitionsEndX: startAnchoredExhibitionsX,
-        andTargetX: fallbackAndX,
-        artistsTargetX: fallbackAndX + andWidth + 12 + nudgeArt,
+        artistsTargetX: fallbackArtistsX,
+        institutionsTargetX: fallbackArtistsX + artistsWidth + 24,
       };
     }
 
@@ -573,15 +581,16 @@ function setupExhibitionsLabel({
     const artistsTargetX = nonNegativeX(
       sankeyTargets.artistLeft - trackRect.left + nudgeArt,
     );
-    const andTargetX = nonNegativeX(
-      (sankeyTargets.exhibitionRight + sankeyTargets.artistLeft) / 2 - trackRect.left - andWidth / 2,
-    );
+    const institutionsTargetX =
+      sankeyTargets.institutionLeft == null
+        ? null
+        : nonNegativeX(sankeyTargets.institutionLeft - trackRect.left + nudgeInst);
 
     return {
       exhibitionsStartX: clampStartX(startAnchoredExhibitionsX),
       exhibitionsEndX,
-      andTargetX,
       artistsTargetX,
+      institutionsTargetX,
     };
   }
 
@@ -592,8 +601,8 @@ function setupExhibitionsLabel({
     const {
       exhibitionsStartX,
       exhibitionsEndX,
-      andTargetX,
       artistsTargetX,
+      institutionsTargetX,
     } = getTokenTargets();
 
     const yP = Math.min(p / 0.15, 1);
@@ -609,14 +618,13 @@ function setupExhibitionsLabel({
     });
 
     const fP = gsap.utils.clamp(0, 1, (p - 0.21) / 0.06);
-    gsap.set(andEl, {
-      x: andTargetX,
-      opacity: fP,
-    });
     gsap.set(artistsEl, {
       x: artistsTargetX,
       opacity: fP,
     });
+    if (institutionsEl && institutionsTargetX != null) {
+      gsap.set(institutionsEl, { x: institutionsTargetX, opacity: fP });
+    }
   }
 
   function setStartAnchorState(labelOpacity = 1) {
@@ -624,8 +632,7 @@ function setupExhibitionsLabel({
     const top = labelTopForTokenCenter(yFromTimelineBaseline());
     gsap.set(labelEl, { top, opacity: labelOpacity });
     gsap.set(exhibitionsEl, { x: exhibitionsStartX, opacity: 1 });
-    gsap.set(andEl, { opacity: 0 });
-    gsap.set(artistsEl, { opacity: 0 });
+    gsap.set(fadeInEls, { opacity: 0 });
   }
 
   function syncExhibitionsLabelToScrollPosition() {

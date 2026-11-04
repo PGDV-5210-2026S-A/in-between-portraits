@@ -26,6 +26,25 @@ export function exhibitionTooltipShowOptions(d) {
   };
 }
 
+export function institutionTooltipShowOptions(d) {
+  const loc = d.location ? escapeHtml(d.location) : "-";
+  const count = Number(d.artistCount);
+  const artistLine = Number.isFinite(count)
+    ? `<div>${count} ${count === 1 ? "artist" : "artists"}</div>`
+    : "";
+  const visitorLine = d.visitors
+    ? `<div>${escapeHtml(d.visitors)} visitors in 2025${
+        d.ranking ? ` (#${escapeHtml(d.ranking)})` : ""
+      }</div>`
+    : "";
+  return {
+    bg: "#fff",
+    fg: "#111",
+    border: "#111",
+    html: `<div style="line-height:1.25"><div><strong>${escapeHtml(d.name)}</strong></div><div style="height:0.8em"></div><div>${loc}</div>${artistLine}${visitorLine}</div>`,
+  };
+}
+
 export function artistTooltipShowOptions(d) {
   const life = d.lifeLine
     ? `<div style="margin-top:2px">${escapeHtml(d.lifeLine)}</div>`

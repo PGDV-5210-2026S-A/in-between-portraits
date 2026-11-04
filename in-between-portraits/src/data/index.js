@@ -116,15 +116,7 @@ export function fetchAndParseData() {
   artistsById.value = Object.fromEntries(artistArr.map((a) => [a.id, a]));
 
   institutionsById.value = Object.fromEntries(
-    institutionArr.map((i) => {
-      let artistIds = [];
-      try {
-        artistIds = JSON.parse(i.artists.replace(/'/g, '"'));
-      } catch {
-        artistIds = [];
-      }
-      return [i.id, { ...i, artistIds }];
-    }),
+    institutionArr.map((i) => [i.id, { ...i }]),
   );
 
   artworks.value = artworkArr.map((a) => ({
